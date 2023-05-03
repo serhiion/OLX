@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="center">
+    <h1 class="text-center">List ads</h1>
+    <button type="button" class="btn btn-primary mb-3" onclick="updateList()">Update</button>
+    <button type="button" class="btn btn-primary mb-3" onclick="updateList(sort='price')">Update and sort by price</button>
+    <a class="btn btn-primary mb-3" href="/logout">Logout</a>
+    <div id="list">
+    </div>
+</div>
+
+<script>
+      async function updateList(sort='date') {
+  try {
+    var list = document.getElementById("list");
+    list.innerHTML = "";
+
+    var response = await fetch(`/advertisements/${sort}`);
+    var data = await response.json();
+
+    for (var i = 0; i < data.length; i++) {
+      var item = document.createElement("div");
+      item.className = "item";
+       item.innerHTML = `
+          <div class="card-body">
+            <h5 class="card-title">${data[i].name}</h5>
+            ${data[i].image ? `<img src="${data[i].image}" class="card-img-top" alt="${data[i].name}">` : ""}
+            <p class="card-text">${data[i].price} ${data[i].currency}</p>
+            ${data[i].author ? `<p class="card-text">Author: ${data[i].author}</p>` : ""}
+            <button class="btn btn-danger delete-button"  onclick='deleteItem(this)' data-id='${data[i].id}'>Delete</button>
+          </div>
+        `;
+      list.appendChild(item);
+    }
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+      function deleteItem(item) {
+      const id = item.dataset.id;
+      fetch(`/advertisements/delete/${id}`, {
+    method: "DELETE"
+  })
+  .then(response => response.json())
+  .then(data => {
+    console.log("Deleted item with id:", id);
+     item.parentElement.remove();
+  })
+  .catch(error => console.error(error));
+      }
+
+
+
+
+</script>
+{% endblock %}
